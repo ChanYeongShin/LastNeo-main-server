@@ -3,7 +3,7 @@ Description=uWSGI service
 After=syslog.target
 
 [Service]
-ExecStart=/home/ubuntu/venv/lastneo/bin/uwsgi -i /home/ubuntu/lastneo/.config/uwsgi/lastneo.ini
+ExecStart=/home/ubuntu/venv/lastneo/bin/uwsgi -i /home/ubuntu/LastNeo-main-server/.config/uwsgi/lastneo.ini
 
 Restart=always
 KillSignal=SIGQUIT
