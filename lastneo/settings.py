@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-9_c8=z1x8%=*je@033)-(xee%cg723p+%z%(fsm6lykwrry&ga
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['3.37.147.189', '*.compute.amazonaws.com']
+ALLOWED_HOSTS = ['3.37.147.189', '*.compute.amazonaws.com', "lastneo.io"]
 
 
 # Application definition
