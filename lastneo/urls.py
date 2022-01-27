@@ -16,7 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from neohome.views import NeoHomeIsOwnerAPIView
+
+
 urlpatterns = [
+
     path('admin/', admin.site.urls),
-    path('', include(('landing.urls'))),
+    # path('', include(('landing.urls'))),
+
+    path('accounts/v1/', include('accounts.urls')),
+    path('api/v1/', include('core.urls')),
+    path('api/v1/', include('neogrowth.urls')),
+    path('api/v1/', include('neohome.urls')),
 ]

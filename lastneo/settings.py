@@ -12,36 +12,70 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from lastneo.loader import load_credential
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = os.path.dirname(BASE_DIR)
+
+SETTING_DEV_DIC = load_credential("develop")
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9_c8=z1x8%=*je@033)-(xee%cg723p+%z%(fsm6lykwrry&ga'
+SECRET_KEY = SETTING_DEV_DIC['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['3.37.147.189', '*.compute.amazonaws.com', '.lastneo.io']
+ALLOWED_HOSTS = ['*']
 
+INTERNAL_IPS = ('172.31.9.57')
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'landing'
+    'django.contrib.sites',
 ]
 
+SECONDS_APPS = [
+    'landing',
+    'accounts',
+    'core',
+    'neogrowth',
+    'blockchain',
+    'neohome',
+    'nft',
+    'notice'
+]
+
+THIRD_APPS = [
+    'corsheaders',
+    # 'ckeditor',
+    # 'ckeditor_uploader',
+    'rest_framework',
+    'rest_framework.authtoken',
+    # 'pymysql',
+    # 'wpadmin',
+    'storages',
+    # 'debug_toolbar',
+    # 'crispy_forms',
+    # 'django_crontab'
+]
+
+INSTALLED_APPS += SECONDS_APPS + THIRD_APPS
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,7 +90,7 @@ ROOT_URLCONF = 'lastneo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,10 +110,7 @@ WSGI_APPLICATION = 'lastneo.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': SETTING_DEV_DIC["default"],
 }
 
 
@@ -115,14 +146,53 @@ USE_L10N = True
 
 USE_TZ = True
 
+# drf 토큰인증처
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+SITE_ID = 1
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'accounts.User'
+
+
+# AWS
+AWS_ACCESS_KEY_ID = SETTING_DEV_DIC['S3']['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = SETTING_DEV_DIC['S3']['AWS_SECRET_ACCESS_KEY']
+AWS_DEFAULT_ACL = SETTING_DEV_DIC['S3']['AWS_DEFAULT_ACL']
+AWS_S3_REGION_NAME = SETTING_DEV_DIC['S3']['AWS_S3_REGION_NAME']
+AWS_S3_SIGNATURE_VERSION = SETTING_DEV_DIC['S3']['AWS_S3_SIGNATURE_VERSION']
+AWS_STORAGE_BUCKET_NAME = SETTING_DEV_DIC['S3']['AWS_STORAGE_BUCKET_NAME']
+
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_HOST = 's3.%s.amazonaws.com' % AWS_S3_REGION_NAME
+
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
+STATIC_LOCATION = 'statics'
+STATIC_URL = "https://%s/%s/" % (AWS_S3_HOST, STATIC_LOCATION)
+STATICFILES_STORAGE = 'lastneo.storage.StaticStorage'
+
+MEDIA_LOCATION = 'media'
+MEDIA_URL = "https://%s/%s/" % (AWS_S3_HOST, MEDIA_LOCATION)
+
+DEFAULT_FILE_STORAGE = 'lastneo.storage.CustomS3Boto3Storage'
+
+STATIC_ROOT = "https://%s/statics/" % AWS_S3_CUSTOM_DOMAIN
+MEDIA_ROOT = "https://%s/media/" % AWS_S3_CUSTOM_DOMAIN
+# STATIC_URL = '/static/'
+# STATIC_DIR = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = [
+#     STATIC_DIR,
+# ]
+# STATIC_ROOT = os.path.join(ROOT_DIR, '.static_root')
+
+# CORS_ORIGIN_WHITELIST = (
+#     'localhost:3000/',
+# )

@@ -1,3 +1,7 @@
+.DS_Store
+lastneo/server_info.json
+core/core_info.json
+
 .idea/
 migrations/
 static/
