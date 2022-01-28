@@ -66,7 +66,7 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
 
     # TODO: Base Url 변경
     def get_home_address(self, obj):
-        return 'http://3.37.147.189/' + obj.nickname + '/'
+        return 'http://10.34.220.196:3000/' + obj.nickname
 
     def get_mbti(self, obj):
         return obj.neo.mbti.mbti_name
@@ -171,7 +171,7 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
 
     # TODO: Base Url 변경
     def get_home_address(self, obj):
-        return 'http://3.37.147.189/' + obj.nickname + '/'
+        return 'http://10.34.220.196:3000/' + obj.nickname
 
     def get_mbti(self, obj):
         return obj.neo.mbti.mbti_name

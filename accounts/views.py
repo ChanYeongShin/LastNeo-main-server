@@ -120,9 +120,9 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         hash_key = serializer.save()
 
         # TODO : dev / prod 구분
-        hash_address = 'http://3.37.147.189:8080/' + hash_key
+        hash_address = 'http://10.34.220.196:3000/' + hash_key
         nickname = request.data.pop('nickname')
-        home_address = 'http://3.37.147.189:8080/' + nickname + '/'
+        home_address = 'http://10.34.220.196:3000/' + nickname
 
         # neo image 생성 (표정과 배경은 랜덤)
         self.neo_image, self.neo_upper_image = self._create_neo_image()

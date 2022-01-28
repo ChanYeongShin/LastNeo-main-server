@@ -24,6 +24,7 @@ from neohome.serializers import NeoHomeGuestInfoRetrieveSerializer, NeoHomeOwner
 from neogrowth.serializers import Big5AnswerCreateSerializer, PersonalityItemsInfoSerializer
 from blockchain.serializers import NeoDataCreateSerializer, NeoBlockCreateSerializer
 
+
 class NeoHomeDoorAPI(APIView):
     permission_classes = [AllowAny]
     """
@@ -36,7 +37,7 @@ class NeoHomeDoorAPI(APIView):
         api: lastneo.io/api/v1/door/
         method : POST
         data: {'data' : }
-        return : {'is_exact': (Boolean), 'hash_address': (string)}
+        return : {'is_exact': (Boolean), 'nickname': (string)}
         """
         data = request.data.copy()
         content = data.get('data')
@@ -156,6 +157,9 @@ class NeoHomeOwnerViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         """
+        owner 로 입장했을 때 정보를 받아오는 api 로 네오 캐릭터 방에 있는 정보들을 return 합니다.
+        api : api/v1/neohomeowner/<nickname>
+        return : {guest 정보 serializer 정보, status}
         """
         nickname = self.kwargs['nickname']
         self.neohome = NeoHome.objects.get(nickname=nickname)
