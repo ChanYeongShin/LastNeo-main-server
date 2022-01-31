@@ -195,7 +195,8 @@ MEDIA_ROOT = "https://%s/media/" % AWS_S3_CUSTOM_DOMAIN
 
 CORS_ORIGIN_WHITELIST = (
     'http://10.34.220.196:3000',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://3.37.14.91'
 )
 
 CORS_ALLOW_METHODS = [
@@ -206,3 +207,5 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
