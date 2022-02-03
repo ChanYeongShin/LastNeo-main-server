@@ -66,7 +66,7 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
 
     # TODO: Base Url 변경
     def get_home_address(self, obj):
-        return 'http://10.34.220.196:3000/' + obj.nickname
+        return 'http://3.37.14.91/' + obj.nickname
 
     def get_mbti(self, obj):
         return obj.neo.mbti.mbti_name
@@ -171,7 +171,7 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
 
     # TODO: Base Url 변경
     def get_home_address(self, obj):
-        return 'http://10.34.220.196:3000/' + obj.nickname
+        return 'http://3.37.14.91/' + obj.nickname
 
     def get_mbti(self, obj):
         return obj.neo.mbti.mbti_name
@@ -272,7 +272,7 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
         }
         today_section = str(datetime.datetime.today().weekday())
         self.today_section = section_dic.get(today_section)
-        big5question_qs = Big5Question.objects.filter(section=self.today_section, big5_answers__isnull=True).order_by('?')[:5]
+        big5question_qs = Big5Question.objects.filter(section=self.today_section).exclude(big5_answers__neo=obj.neo).order_by('?')[:5]
         for big5question in big5question_qs.iterator():
             dic = {}
             dic["id"] = big5question.id

@@ -120,9 +120,9 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         hash_key = serializer.save()
 
         # TODO : dev / prod 구분
-        hash_address = 'http://10.34.220.196:3000/' + hash_key
+        hash_address = 'http://3.37.14.91/' + hash_key
         nickname = request.data.pop('nickname')
-        home_address = 'http://10.34.220.196:3000/' + nickname
+        home_address = 'http://3.37.14.91/' + nickname
 
         # neo image 생성 (표정과 배경은 랜덤)
         self.neo_image, self.neo_upper_image = self._create_neo_image()
@@ -217,7 +217,7 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         neo_upper_layer_arg_list = sorted(range(len(neo_upper_layer_list)), key=neo_upper_layer_list.__getitem__)
         neo_image_list.insert(neo_layer_arg_list[0], item.item_full_image.url)
         neo_upper_image_list.insert(neo_upper_layer_arg_list[0], item.item_half_image.url)
-        neo_image_list.insert(0, random_item.item_image.url)
+        # neo_image_list.insert(0, random_item.item_image.url)
         neo_upper_image_list.insert(0, random_item.item_image.url)
 
         # STEP 2 : neo image 실제 합치기 작업
@@ -241,12 +241,12 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
 
         final = image_list[0].convert('RGB')
         output = BytesIO()
-        final.save(output, format="JPEG")
-        final_image = InMemoryUploadedFile(output, None, 'full.jpg', 'image/jpeg', len(output.getvalue()), None)
+        final.save(output, format="PNG")
+        final_image = InMemoryUploadedFile(output, None, 'full.png', 'image/png', len(output.getvalue()), None)
         final_upper = upper_image_list[0].convert('RGB')
         output_upper = BytesIO()
-        final_upper.save(output_upper, format="JPEG")
-        final_upper_image = InMemoryUploadedFile(output_upper, None, 'upper.jpg', 'image/jpeg', len(output_upper.getvalue()), None)
+        final_upper.save(output_upper, format="PNG")
+        final_upper_image = InMemoryUploadedFile(output_upper, None, 'upper.png', 'image/png', len(output_upper.getvalue()), None)
 
         return final_image, final_upper_image
 

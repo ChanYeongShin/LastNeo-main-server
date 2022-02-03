@@ -64,6 +64,7 @@ class NeoHomeDoorAPI(APIView):
 
 class NeoHomeIsOwnerAPIView(APIView):
     permission_classes = [AllowAny]
+    lookup_value_regex = r"[\w.]+"
 
     def get(self, request, *args, **kwargs):
         """
@@ -89,6 +90,7 @@ class NeoHomeIsOwnerAPIView(APIView):
 
 class NeoHomeIntroductionAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    lookup_value_regex = r"[\w.]+"
 
     def put(self, request, *args, **kwargs):
         """
@@ -121,6 +123,7 @@ class NeoHomeGuestViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     queryset = NeoHome.objects.filter().all()
     lookup_field = 'nickname'
+    lookup_value_regex = r"[\w.]+"
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -147,6 +150,7 @@ class NeoHomeOwnerViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = NeoHome.objects.filter().all()
     lookup_field = 'nickname'
+    lookup_value_regex = r"[\w.]+"
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -195,7 +199,13 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         # NeoData + NeoBlock 만드는 과정
         self._create_blockchain()
 
-        serializer = PersonalityItemsInfoSerializer(self.personality_items.item_meta)
+        # TODO: 애매한 답변 frontend 와 맞추기
+        try:
+            serializer = PersonalityItemsInfoSerializer(self.personality_items.item_meta)
+        except:
+            return Response({"item_name": "인격 공유 잘 받았어! 이번에는 캐릭터에 아아템을 별로 끼고 싶지 않은걸. "
+                                          "아이템이 없는 것도 표현방식 중 하나야! 다음에는 아이템을 끼고 싶을지도.."},
+                            status=status.HTTP_201_CREATED)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -303,7 +313,7 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         neo_upper_layer_list.insert(0, 38)
         neo_layer_arg_list = sorted(range(len(neo_layer_list)), key=neo_layer_list.__getitem__)
         neo_upper_layer_arg_list = sorted(range(len(neo_upper_layer_list)), key=neo_upper_layer_list.__getitem__)
-        neo_image_list.insert(neo_layer_arg_list[-1], random_item.item_image.url)
+        # neo_image_list.insert(neo_layer_arg_list[-1], random_item.item_image.url)
         neo_upper_image_list.insert(neo_upper_layer_arg_list[-1], random_item.item_image.url)
 
         # Big5 item
@@ -312,28 +322,31 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
             neo_layer_list = sorted(neo_layer_list, reverse=True)
             neo_upper_layer_list = sorted(neo_upper_layer_list, reverse=True)
             big5_item_meta_layer_level = big5_item.layer_level
-            neo_layer_list.append(big5_item_meta_layer_level)
-            neo_upper_layer_list.append(big5_item_meta_layer_level)
-            neo_layer_arg_list = sorted(range(len(neo_layer_list)), key=neo_layer_list.__getitem__)
-            neo_upper_layer_arg_list = sorted(range(len(neo_upper_layer_list)), key=neo_upper_layer_list.__getitem__)
-            for i in range(len(neo_layer_arg_list)):
-                if i == 0:
-                    pass
-                else:
-                    if neo_layer_arg_list[i] > neo_layer_arg_list[i-1]:
-                        neo_image_list.insert(len(neo_image_list)-i, big5_item.item_full_image.url)
-                        break
-                    if i == len(neo_layer_arg_list)-1 and neo_layer_arg_list[i] < neo_layer_arg_list[i-1]:
-                        neo_image_list.append(big5_item.item_full_image.url)
-            for i in range(len(neo_upper_layer_arg_list)):
-                if i == 0:
-                    pass
-                else:
-                    if neo_upper_layer_arg_list[i] > neo_upper_layer_arg_list[i-1]:
-                        neo_upper_image_list.insert(len(neo_upper_image_list)-i, big5_item.item_half_image.url)
-                        break
-                    if i == len(neo_upper_layer_arg_list)-1 and neo_upper_layer_arg_list[i] < neo_upper_layer_arg_list[i-1]:
-                        neo_upper_image_list.append(big5_item.item_half_image.url)
+            if big5_item.layer_level in neo_layer_list:
+                print("DUPLICATED!")
+            else:
+                neo_layer_list.append(big5_item_meta_layer_level)
+                neo_upper_layer_list.append(big5_item_meta_layer_level)
+                neo_layer_arg_list = sorted(range(len(neo_layer_list)), key=neo_layer_list.__getitem__)
+                neo_upper_layer_arg_list = sorted(range(len(neo_upper_layer_list)), key=neo_upper_layer_list.__getitem__)
+                for i in range(len(neo_layer_arg_list)):
+                    if i == 0:
+                        pass
+                    else:
+                        if neo_layer_arg_list[i] > neo_layer_arg_list[i-1]:
+                            neo_image_list.insert(len(neo_image_list)-i, big5_item.item_full_image.url)
+                            break
+                        if i == len(neo_layer_arg_list)-1 and neo_layer_arg_list[i] < neo_layer_arg_list[i-1]:
+                            neo_image_list.append(big5_item.item_full_image.url)
+                for i in range(len(neo_upper_layer_arg_list)):
+                    if i == 0:
+                        pass
+                    else:
+                        if neo_upper_layer_arg_list[i] > neo_upper_layer_arg_list[i-1]:
+                            neo_upper_image_list.insert(len(neo_upper_image_list)-i, big5_item.item_half_image.url)
+                            break
+                        if i == len(neo_upper_layer_arg_list)-1 and neo_upper_layer_arg_list[i] < neo_upper_layer_arg_list[i-1]:
+                            neo_upper_image_list.append(big5_item.item_half_image.url)
         print("-------------------")
         print(neo_image_list)
         # STEP 2 : neo image 실제 합치기 작업
@@ -357,14 +370,15 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
 
         final = image_list[0].convert('RGB')
         output = BytesIO()
-        final.save(output, format="JPEG")
-        final_image = InMemoryUploadedFile(output, None, 'full.jpg', 'image/jpeg', len(output.getvalue()), None)
+        final.save(output, format="PNG")
+        final_image = InMemoryUploadedFile(output, None, 'full.png', 'image/png', len(output.getvalue()), None)
         final_upper = upper_image_list[0].convert('RGB')
         output_upper = BytesIO()
-        final_upper.save(output_upper, format="JPEG")
-        final_upper_image = InMemoryUploadedFile(output_upper, None, 'upper.jpg', 'image/jpeg', len(output_upper.getvalue()), None)
+        final_upper.save(output_upper, format="PNG")
+        final_upper_image = InMemoryUploadedFile(output_upper, None, 'upper.png', 'image/png', len(output_upper.getvalue()), None)
 
         return final_image, final_upper_image
+
 
 # TODO : update 천천히 하면서 개발..
 class NFTViewSet(viewsets.ModelViewSet):

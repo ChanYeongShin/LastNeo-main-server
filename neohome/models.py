@@ -2,9 +2,20 @@ from django.db import models
 
 from django.conf import settings
 
+import random
+import string
+
 
 def home_image_directory_path(instance, filename):
     return 'home/image/{}'.format(filename)
+
+
+def neo_home_image_directory_path(instance, filename):
+    return 'home/{}/image/{}'.format(instance.neo, generate_random_key(7))
+
+
+def generate_random_key(length):
+    return ''.join(random.choices(string.digits+string.ascii_letters, k=length))
 
 
 class NeoHomeMeta(models.Model):
@@ -22,7 +33,7 @@ class NeoHome(models.Model):
     nickname = models.CharField(null=True, blank=True, max_length=20, help_text='네오집의 이름, url 형성시 https://lastneo.io/<nickname>')
     description = models.CharField(default="나를 담는 단 하나의 방법 '네오'", max_length=100, help_text="네오 집 소개글")
     home_meta = models.ForeignKey(NeoHomeMeta, null=True, blank=True, on_delete=models.CASCADE, related_name='neohomes')
-    # home_image = models.ImageField(null=True, blank=True)
+    # neo_home_image = models.ImageField(null=True, blank=True, upload_to=neo_home_image_directory_path)
 
 
 class Visitor(models.Model):
