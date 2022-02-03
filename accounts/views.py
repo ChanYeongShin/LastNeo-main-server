@@ -177,8 +177,11 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
             schwartz_id = SchwartzMeta.objects.get(name=values[i]).schwartz.name
             schwartz_id_list.append(schwartz_id)
         frequent_list = statistics.multimode(schwartz_id_list)
-        frequent_id = random.choice(frequent_list)
-        self.schwartz_name = Schwartz.objects.get(name=frequent_id).name
+        if len(frequent_list) == 5:
+            self.schwartz_name = Schwartz.objects.get(name="잠재").name
+        else:
+            frequent_id = random.choice(frequent_list)
+            self.schwartz_name = Schwartz.objects.get(name=frequent_id).name
         tag = Tag.objects.get(classify_id__classify_name__contains=self.schwartz_name)
         return tag.id
 
@@ -239,11 +242,11 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
             if i > 0:
                 upper_image_list[0].paste(upper_image_list[i], (0,0), upper_image_list[i])
 
-        final = image_list[0].convert('RGB')
+        final = image_list[0].convert('RGBA')
         output = BytesIO()
         final.save(output, format="PNG")
         final_image = InMemoryUploadedFile(output, None, 'full.png', 'image/png', len(output.getvalue()), None)
-        final_upper = upper_image_list[0].convert('RGB')
+        final_upper = upper_image_list[0].convert('RGBA')
         output_upper = BytesIO()
         final_upper.save(output_upper, format="PNG")
         final_upper_image = InMemoryUploadedFile(output_upper, None, 'upper.png', 'image/png', len(output_upper.getvalue()), None)

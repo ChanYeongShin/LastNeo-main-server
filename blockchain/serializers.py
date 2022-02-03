@@ -68,11 +68,10 @@ class NeoBlockCreateSerializer(serializers.ModelSerializer):
 
         self.user = User.objects.get(pk=self.user_id)
         neoblock, _ = NeoBlock.objects.get_or_create(neo=self.user, proof=proof, previous_hash=previous_hash,
-                                           index=index, timestamp=time())
+                                           index=index)
         neoblock_qs = NeoBlock.objects.filter(neo=self.user)
         for neoblock_obj in neoblock_qs.iterator():
             block_data = {
-                'neo': neoblock_obj.neo,
                 'proof': neoblock_obj.proof,
                 'previous_hash': neoblock_obj.previous_hash,
                 'index': neoblock_obj.index,
@@ -128,6 +127,7 @@ class BlockChain(object):
 
         # generate block
         self.new_block(previous_hash=initial_hash, proof=proof)
+
 
     def register_node(self, address):
         """
@@ -225,7 +225,10 @@ class BlockChain(object):
         }
 
         self.current_transactions = []
-        self.chain.append(block)
+        if self.chain == []:
+            self.chain.append(block)
+        else:
+            print("NOT INITIAL")
 
         return block
 

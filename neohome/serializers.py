@@ -48,14 +48,14 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
     home_address = serializers.SerializerMethodField()
     neo_image = serializers.SerializerMethodField()
     value_items = serializers.SerializerMethodField()
-    big5_items = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
     nfts_info = serializers.SerializerMethodField()
     mbti = serializers.SerializerMethodField()
     mbti_name = serializers.SerializerMethodField()
 
     class Meta:
         model = NeoHome
-        fields = ["neo_room_image", "mini_profile", "mbti", "mbti_name", "home_address", "description", "neo_image", "value_items", "big5_items", "nfts_info"]
+        fields = ["neo_room_image", "mini_profile", "mbti", "mbti_name", "home_address", "description", "neo_image", "value_items", "items", "nfts_info"]
         lookup_field = 'nickname'
 
     def get_neo_room_image(self, obj):
@@ -82,24 +82,34 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
         neo = obj.neo
         dic = {}
         value_items = ValuesItems.objects.filter(neo=neo).last()
-        schwartz_answers_qs = value_items.schwartz_answers.all()
-        schwartz_id_list = []
-        for schwartz_answer in schwartz_answers_qs.iterator():
-            schwartz_id = SchwartzMeta.objects.get(name=schwartz_answer.schwartz_meta.name).schwartz.name
-            schwartz_id_list.append(schwartz_id)
-        frequent_list = statistics.multimode(schwartz_id_list)
-        value_name = random.choice(frequent_list)
+        value_name = value_items.item_meta.sub_category.tag.classify_id.classify_name[-2:]
         dic['value_name'] = value_name
         dic['name'] = value_items.item_meta.name
         dic['description'] = value_items.item_meta.description
         dic['item_image'] = value_items.item_meta.item_image.url
         return dic
 
-    def get_big5_items(self, obj):
+    def get_items(self, obj):
         neo = obj.neo
-        big5_item_list = []
-        big5_item_layer_list = []
-        big5_item_name_list = []
+        item_list = []
+        item_layer_list = []
+        item_name_list = []
+
+        dic = {}
+        value_items = ValuesItems.objects.filter(neo=neo).last()
+        dic['item_name'] = value_items.item_meta.name
+        dic['item_image'] = value_items.item_meta.item_image.url
+        daytime = value_items.created_at
+        daytime = DateFormat(daytime).format('Y.m.d')
+        dic["created_at"] = daytime
+        today_daytime = DateFormat(datetime.datetime.today()).format('Y.m.d')
+        if today_daytime == daytime:
+            dic["today_received"] = True
+        else:
+            dic["today_received"] = False
+
+        item_list.append(dic)
+
         # TODO : 중복제거 distinct() 써서 더 예쁘게..
         big5_items_qs = PersonalityItems.objects.filter(neo=neo).order_by('-created_at')
         for big5_item in big5_items_qs.iterator():
@@ -107,20 +117,21 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
             dic["item_name"] = big5_item.item_meta.name
             dic["item_image"] = big5_item.item_meta.item_image.url
             daytime = big5_item.created_at
-            daytime = DateFormat(daytime).format('Y년 m월 d일')
+            daytime = DateFormat(daytime).format('Y.m.d')
             dic["created_at"] = daytime
-            today_daytime = DateFormat(datetime.datetime.today()).format('Y년 m월 d일')
+            today_daytime = DateFormat(datetime.datetime.today()).format('Y.m.d')
             if today_daytime == daytime:
                 dic["today_received"] = True
             else:
                 dic["today_received"] = False
-            if (big5_item.item_meta.layer_level in big5_item_layer_list) or (big5_item.item_meta.name in big5_item_name_list):
+            if (big5_item.item_meta.layer_level in item_layer_list) or (big5_item.item_meta.name in item_name_list):
                 print("DUPLICATED!")
             else:
-                big5_item_list.append(dic)
-                big5_item_layer_list.append(big5_item.item_meta.layer_level)
-                big5_item_name_list.append(big5_item.item_meta.name)
-        return big5_item_list
+                item_list.append(dic)
+                item_layer_list.append(big5_item.item_meta.layer_level)
+                item_name_list.append(big5_item.item_meta.name)
+
+        return item_list
 
     def get_nfts_info(self, obj):
         nft_info_list = []
@@ -130,9 +141,9 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
             nft_qs = NFT.objects.filter(pk=nft.id).last()
             dic["nft_image"] = nft_qs.nft_image.url
             daytime = nft_qs.created_at
-            daytime = DateFormat(daytime).format('Y년 m월 d일')
+            daytime = DateFormat(daytime).format('Y.m.d')
             dic["created_at"] = daytime
-            today_daytime = DateFormat(datetime.datetime.today()).format('Y년 m월 d일')
+            today_daytime = DateFormat(datetime.datetime.today()).format('Y.m.d')
             if today_daytime == daytime:
                 dic["today_received"] = True
             else:
@@ -148,7 +159,7 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
     home_address = serializers.SerializerMethodField()
     neo_image = serializers.SerializerMethodField()
     value_items = serializers.SerializerMethodField()
-    big5_items = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
     nfts_info = serializers.SerializerMethodField()
     today_datetime = serializers.SerializerMethodField()
     neo_questions = serializers.SerializerMethodField()
@@ -159,8 +170,8 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NeoHome
-        fields = ["neo_room_image", "mini_profile", "home_address", "mbti", "mbti_name", "description", "neo_image", "value_items", "big5_items", "nfts_info",
-                  "today_datetime", "neo_questions", "neo_blocks", "is_done"]
+        fields = ["neo_room_image", "mini_profile", "home_address", "mbti", "mbti_name", "description", "neo_image",
+                  "value_items", "items", "nfts_info", "today_datetime", "neo_questions", "neo_blocks", "is_done"]
         lookup_field = 'nickname'
 
     def get_neo_room_image(self, obj):
@@ -187,24 +198,34 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
         neo = obj.neo
         dic = {}
         value_items = ValuesItems.objects.filter(neo=neo).last()
-        schwartz_answers_qs = value_items.schwartz_answers.all()
-        schwartz_id_list = []
-        for schwartz_answer in schwartz_answers_qs.iterator():
-            schwartz_id = SchwartzMeta.objects.get(name=schwartz_answer.schwartz_meta.name).schwartz.name
-            schwartz_id_list.append(schwartz_id)
-        frequent_list = statistics.multimode(schwartz_id_list)
-        value_name = random.choice(frequent_list)
+        value_name = value_items.item_meta.sub_category.tag.classify_id.classify_name[-2:]
         dic['value_name'] = value_name
         dic['name'] = value_items.item_meta.name
         dic['description'] = value_items.item_meta.description
         dic['item_image'] = value_items.item_meta.item_image.url
         return dic
 
-    def get_big5_items(self, obj):
+    def get_items(self, obj):
         neo = obj.neo
-        big5_item_list = []
-        big5_item_layer_list = []
-        big5_item_name_list = []
+        item_list = []
+        item_layer_list = []
+        item_name_list = []
+
+        dic = {}
+        value_items = ValuesItems.objects.filter(neo=neo).last()
+        dic['item_name'] = value_items.item_meta.name
+        dic['item_image'] = value_items.item_meta.item_image.url
+        daytime = value_items.created_at
+        daytime = DateFormat(daytime).format('Y.m.d')
+        dic["created_at"] = daytime
+        today_daytime = DateFormat(datetime.datetime.today()).format('Y.m.d')
+        if today_daytime == daytime:
+            dic["today_received"] = True
+        else:
+            dic["today_received"] = False
+
+        item_list.append(dic)
+
         # TODO : 중복제거 distinct() 써서 더 예쁘게..
         big5_items_qs = PersonalityItems.objects.filter(neo=neo).order_by('-created_at')
         for big5_item in big5_items_qs.iterator():
@@ -212,20 +233,21 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
             dic["item_name"] = big5_item.item_meta.name
             dic["item_image"] = big5_item.item_meta.item_image.url
             daytime = big5_item.created_at
-            daytime = DateFormat(daytime).format('Y년 m월 d일')
+            daytime = DateFormat(daytime).format('Y.m.d')
             dic["created_at"] = daytime
-            today_daytime = DateFormat(datetime.datetime.today()).format('Y년 m월 d일')
+            today_daytime = DateFormat(datetime.datetime.today()).format('Y.m.d')
             if today_daytime == daytime:
                 dic["today_received"] = True
             else:
                 dic["today_received"] = False
-            if (big5_item.item_meta.layer_level in big5_item_layer_list) or (big5_item.item_meta.name in big5_item_name_list):
+            if (big5_item.item_meta.layer_level in item_layer_list) or (big5_item.item_meta.name in item_name_list):
                 print("DUPLICATED!")
             else:
-                big5_item_list.append(dic)
-                big5_item_layer_list.append(big5_item.item_meta.layer_level)
-                big5_item_name_list.append(big5_item.item_meta.name)
-        return big5_item_list
+                item_list.append(dic)
+                item_layer_list.append(big5_item.item_meta.layer_level)
+                item_name_list.append(big5_item.item_meta.name)
+
+        return item_list
 
     def get_nfts_info(self, obj):
         nft_info_list = []
@@ -235,9 +257,9 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
             nft_qs = NFT.objects.filter(pk=nft.id).last()
             dic["nft_image"] = nft_qs.nft_image.url
             daytime = nft_qs.created_at
-            daytime = DateFormat(daytime).format('Y년 m월 d일')
+            daytime = DateFormat(daytime).format('Y.m.d')
             dic["created_at"] = daytime
-            today_daytime = DateFormat(datetime.datetime.today()).format('Y년 m월 d일')
+            today_daytime = DateFormat(datetime.datetime.today()).format('Y.m.d')
             if today_daytime == daytime:
                 dic["today_received"] = True
             else:
@@ -256,7 +278,7 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
         #     "5": "토요일",
         #     "6": "일요일",
         # }
-        today_datetime = DateFormat(datetime.datetime.today()).format('Y년 m월 d일')
+        today_datetime = DateFormat(datetime.datetime.today()).format('Y.m.d')
         # today_weekday = str(datetime.datetime.today().weekday())
         # today_weekday = week_dic.get(today_weekday)
         return today_datetime

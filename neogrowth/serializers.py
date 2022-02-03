@@ -38,10 +38,14 @@ class Big5AnswerCreateSerializer(serializers.ModelSerializer):
 
 class PersonalityItemsInfoSerializer(serializers.ModelSerializer):
     item_name = serializers.SerializerMethodField()
+    item_status = serializers.SerializerMethodField()
 
     class Meta:
         model = ItemMeta
-        fields = ['item_name', 'item_image']
+        fields = ['item_name', 'item_image', 'item_status']
 
     def get_item_name(self, obj):
         return obj.name
+
+    def get_item_status(self, obj):
+        return True

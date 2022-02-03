@@ -199,13 +199,10 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         # NeoData + NeoBlock 만드는 과정
         self._create_blockchain()
 
-        # TODO: 애매한 답변 frontend 와 맞추기
         try:
             serializer = PersonalityItemsInfoSerializer(self.personality_items.item_meta)
         except:
-            return Response({"item_name": "인격 공유 잘 받았어! 이번에는 캐릭터에 아아템을 별로 끼고 싶지 않은걸. "
-                                          "아이템이 없는 것도 표현방식 중 하나야! 다음에는 아이템을 끼고 싶을지도.."},
-                            status=status.HTTP_201_CREATED)
+            return Response({"item_name": None, "item_image": None, "item_status": False}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -255,7 +252,7 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
             "neo": self.request.user.id,
             "proof": last_neo_block.proof,
             "previous_hash": last_neo_block.previous_hash,
-            "index": num_block + 1
+            "index": num_block
         }
         serializer = NeoBlockCreateSerializer(data=neo_block_data)
         serializer.is_valid(raise_exception=True)
@@ -317,7 +314,7 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         neo_upper_image_list.insert(neo_upper_layer_arg_list[-1], random_item.item_image.url)
 
         # Big5 item
-        big5_item_qs = ItemMeta.objects.filter(personality_items__neo=self.neo)
+        big5_item_qs = ItemMeta.objects.filter(personality_items__neo=self.neo).order_by('-personality_items__created_at')
         for big5_item in big5_item_qs.iterator():
             neo_layer_list = sorted(neo_layer_list, reverse=True)
             neo_upper_layer_list = sorted(neo_upper_layer_list, reverse=True)
@@ -368,11 +365,11 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
             if i > 0:
                 upper_image_list[0].paste(upper_image_list[i], (0,0), upper_image_list[i])
 
-        final = image_list[0].convert('RGB')
+        final = image_list[0].convert('RGBA')
         output = BytesIO()
         final.save(output, format="PNG")
         final_image = InMemoryUploadedFile(output, None, 'full.png', 'image/png', len(output.getvalue()), None)
-        final_upper = upper_image_list[0].convert('RGB')
+        final_upper = upper_image_list[0].convert('RGBA')
         output_upper = BytesIO()
         final_upper.save(output_upper, format="PNG")
         final_upper_image = InMemoryUploadedFile(output_upper, None, 'upper.png', 'image/png', len(output_upper.getvalue()), None)

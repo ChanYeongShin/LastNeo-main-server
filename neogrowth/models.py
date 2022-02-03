@@ -243,7 +243,7 @@ class Big5Answer(models.Model):
 class ValuesItems(models.Model):
     item_meta = models.ForeignKey(ItemMeta, on_delete=models.CASCADE, related_name='values_items')
     neo = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='values_items')
-
+    created_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
 class Schwartz(models.Model):
     """

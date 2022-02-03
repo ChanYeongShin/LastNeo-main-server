@@ -1,4 +1,5 @@
 .DS_Store
+lastneo/settings/prod.py
 lastneo/server_info.json
 core/core_info.json
 
