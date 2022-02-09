@@ -2,6 +2,7 @@ import random
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import transaction, OperationalError
+from django.conf import settings
 from django.utils.dateformat import DateFormat
 from rest_framework.response import Response
 from rest_framework import status
@@ -214,31 +215,31 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         # NeoData + NeoBlock 만드는 과정
         self._create_blockchain()
 
-        # smsmanager = SMSManager.objects.filter().all().last()
-        #
-        # phone = self.neo.phone
-        #
-        # if smsmanager.to_who == 0:
-        #     sms_manager = SMSV2Manager()
-        #     if settings.DEV:
-        #       sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
-        #     else:
-        #       sms_manager.neo_url = "https://lastneo.io/" + self.neo.neohome.last().nickname
-        #     sms_manager.set_first_neo_content()
-        #
-        #     if not sms_manager.send_sms(phone=phone):
-        #         return Response("Failed send sms", status=status.HTTP_410_GONE)
-        # else:
-        #     if self.neo.is_marketing == True:
-        #         sms_manager = SMSV2Manager()
-        #     if settings.DEV:
-        #       sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
-        #     else:
-        #       sms_manager.neo_url = "https://lastneo.io/" + self.neo.neohome.last().nickname
-        #         sms_manager.set_first_neo_content()
-        #
-        #         if not sms_manager.send_sms(phone=phone):
-        #             return Response("Failed send sms", status=status.HTTP_410_GONE)
+        smsmanager = SMSManager.objects.filter().all().last()
+
+        phone = self.neo.phone
+
+        if smsmanager.to_who == 0:
+            sms_manager = SMSV2Manager()
+            if settings.DEV:
+              sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
+            else:
+              sms_manager.neo_url = "https://lastneo.io/" + self.neo.neohome.last().nickname
+            sms_manager.set_first_neo_content()
+
+            if not sms_manager.send_sms(phone=phone):
+                return Response("Failed send sms", status=status.HTTP_410_GONE)
+        else:
+            if self.neo.is_marketing == True:
+                sms_manager = SMSV2Manager()
+            if settings.DEV:
+              sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
+            else:
+              sms_manager.neo_url = "https://lastneo.io/" + self.neo.neohome.last().nickname
+            sms_manager.set_first_neo_content()
+
+            if not sms_manager.send_sms(phone=phone):
+                return Response("Failed send sms", status=status.HTTP_410_GONE)
 
         try:
             serializer = PersonalityItemsInfoSerializer(self.personality_items.item_meta)
