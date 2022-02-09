@@ -220,7 +220,10 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         #
         # if smsmanager.to_who == 0:
         #     sms_manager = SMSV2Manager()
-        #     sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
+        #     if settings.DEV:
+        #       sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
+        #     else:
+        #       sms_manager.neo_url = "https://lastneo.io/" + self.neo.neohome.last().nickname
         #     sms_manager.set_first_neo_content()
         #
         #     if not sms_manager.send_sms(phone=phone):
@@ -228,7 +231,10 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         # else:
         #     if self.neo.is_marketing == True:
         #         sms_manager = SMSV2Manager()
-        #         sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
+        #     if settings.DEV:
+        #       sms_manager.neo_url = "http://3.37.14.91/" + self.neo.neohome.last().nickname
+        #     else:
+        #       sms_manager.neo_url = "https://lastneo.io/" + self.neo.neohome.last().nickname
         #         sms_manager.set_first_neo_content()
         #
         #         if not sms_manager.send_sms(phone=phone):
@@ -274,6 +280,9 @@ class Big5QuestionsViewSet(viewsets.ModelViewSet):
         for item_meta_id in item_meta_id_qs.iterator():
             self.personality_items = PersonalityItems.objects.create(neo=self.neo, item_meta=item_meta_id)
             self.personality_items.save()
+            if self.mbti != "INFP" or section != "E":
+                if item_meta_id.layer_level == 6:
+                    self.personality_items.delete()
             if self.mbti == "INFP" and section == "E" and item_meta_id.layer_level == 7:
                 self.personality_items.delete()
 
