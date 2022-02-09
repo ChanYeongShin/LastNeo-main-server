@@ -119,7 +119,6 @@ class AccountViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
         serializer.is_valid(raise_exception=True)
         hash_key = serializer.save()
 
-        # TODO : dev / prod 구분
         nickname = request.data.pop('nickname')
         if settings.DEV:
             hash_address = 'http://3.37.14.91/' + hash_key

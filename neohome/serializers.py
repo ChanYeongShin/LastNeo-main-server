@@ -308,9 +308,10 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
             question_list.append(dic)
         return question_list
 
-    # TODO : 오늘 만들어졌는지
     def get_is_done(self, obj):
-        if Big5Answer.objects.filter(big5_question__section=self.today_section, neo=obj.neo).exists():
+        from datetime import datetime, time
+        today = datetime.now().date()
+        if Big5Answer.objects.filter(big5_question__section=self.today_section, neo=obj.neo, created_at__gte=today).exists():
             return True
         return False
 
