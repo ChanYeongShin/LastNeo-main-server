@@ -75,19 +75,22 @@ class NeoHomeIsOwnerAPIView(APIView):
     permission_classes = [AllowAny]
     lookup_value_regex = r"[\w.]+"
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """
         NeoHome 주소에 접근할 때 header 에 있는 token 의 여부를 통해 해당 집 주소의 주인이 가진 토큰이라면
         자동 로그인을 시켜주기 위해 사용하는 API
-        api : https://lastneo.io/api/v1/is_owner/<slug:slug>
+        api : https://lastneo.io/api/v1/is_owner/
         header : Authorization
+        data : {'nickname'}
         return : {'is_owner'}
         """
+        data = self.request.data.copy()
+        nickname = data['nickname']
         try:
             key = request.headers['Authorization']
         except Exception as e:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        neo_home = NeoHome.objects.filter(nickname=kwargs['slug']).last()
+        neo_home = NeoHome.objects.filter(nickname=nickname).last()
         if not neo_home:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
@@ -105,17 +108,18 @@ class NeoHomeIntroductionAPIView(APIView):
         """
         NeoHome 의 소개글을 변경할 때 사용하는 API
         guest 는 변경할 수 없기 때문에 Header 에 Token 을 담아서 줘야합니다.
-        api: api/v1/homeintroduction/<slug:slug>/
-        data: {'description'}
+        api: api/v1/homeintroduction/
+        data: {'nickname', 'description'}
         header : Authorization
         return : status
         """
         data = self.request.data
+        nickname = data['nickname']
         try:
             key = request.headers['Authorization'].split(' ')[-1]
         except Exception as e:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        neo_home = NeoHome.objects.filter(nickname=kwargs['slug']).last()
+        neo_home = NeoHome.objects.filter(nickname=nickname).last()
         if not neo_home:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
