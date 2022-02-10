@@ -127,8 +127,11 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
                 dic["today_received"] = True
             else:
                 dic["today_received"] = False
-            if (big5_item.item_meta.layer_level in item_layer_list) or (big5_item.item_meta.name in item_name_list):
+            if (big5_item.item_meta.name in item_name_list) or (big5_item.item_meta.layer_level in item_layer_list):
                 print("DUPLICATED!")
+                if big5_item.item_meta.name in item_name_list:
+                    item_layer_list.append(big5_item.item_meta.layer_level)
+                    print("DUPLICATED!")
             else:
                 item_list.append(dic)
                 item_layer_list.append(big5_item.item_meta.layer_level)
@@ -246,8 +249,11 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
                 dic["today_received"] = True
             else:
                 dic["today_received"] = False
-            if (big5_item.item_meta.layer_level in item_layer_list) or (big5_item.item_meta.name in item_name_list):
+            if (big5_item.item_meta.name in item_name_list) or (big5_item.item_meta.layer_level in item_layer_list):
                 print("DUPLICATED!")
+                if big5_item.item_meta.name in item_name_list:
+                    item_layer_list.append(big5_item.item_meta.layer_level)
+                    print("DUPLICATED!")
             else:
                 item_list.append(dic)
                 item_layer_list.append(big5_item.item_meta.layer_level)
@@ -334,7 +340,6 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
         }
         today_weekday = str(datetime.datetime.today().weekday())
         today_weekday = week_dic.get(today_weekday)
-        print(today_weekday)
         if today_weekday == "토요일" or today_weekday == "일요일":
             return True
         else:
