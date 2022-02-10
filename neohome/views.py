@@ -479,8 +479,11 @@ class NFTViewSet(viewsets.ModelViewSet):
         big5_items_qs = PersonalityItems.objects.filter(neo=self.neo).order_by('-created_at')
         for big5_item in big5_items_qs.iterator():
             item_name = big5_item.item_meta.name
-            if (big5_item.item_meta.layer_level in item_layer_list) or (big5_item.item_meta.name in item_name_list):
+            if (big5_item.item_meta.name in item_name_list) or (big5_item.item_meta.layer_level in item_layer_list):
                 print("DUPLICATED!")
+                if big5_item.item_meta.name in item_name_list:
+                    item_layer_list.append(big5_item.item_meta.layer_level)
+                    print("DUPLICATED!")
             else:
                 item_list.append(item_name)
                 item_layer_list.append(big5_item.item_meta.layer_level)
