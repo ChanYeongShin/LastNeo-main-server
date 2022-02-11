@@ -154,6 +154,7 @@ class NeoHomeGuestInfoRetrieveSerializer(serializers.ModelSerializer):
                 dic["today_received"] = True
             else:
                 dic["today_received"] = False
+            dic["opensea_link"] = nft.opensea_link
 
             nft_info_list.append(dic)
         return nft_info_list
@@ -276,6 +277,7 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
                 dic["today_received"] = True
             else:
                 dic["today_received"] = False
+            dic["opensea_link"] = nft.opensea_link
 
             nft_info_list.append(dic)
         return nft_info_list
