@@ -318,9 +318,9 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
         return question_list
 
     def get_is_done(self, obj):
-        from datetime import datetime, time
+        from datetime import datetime, time, timedelta
         today = datetime.now().date()
-        if Big5Answer.objects.filter(big5_question__section=self.today_section, neo=obj.neo, created_at__gte=today).exists():
+        if Big5Answer.objects.filter(big5_question__section=self.today_section, neo=obj.neo, created_at__gte=today - timedelta(hours=9, minutes=0)).exists():
             return True
         return False
 
