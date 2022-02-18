@@ -175,11 +175,12 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
     mbti_name = serializers.SerializerMethodField()
     is_done = serializers.SerializerMethodField()
     is_weekend = serializers.SerializerMethodField()
+    neodata_infos = serializers.SerializerMethodField()
 
     class Meta:
         model = NeoHome
         fields = ["neo_room_image", "mini_profile", "home_address", "mbti", "mbti_name", "description", "neo_image",
-                  "value_items", "items", "nfts_info", "today_datetime", "neo_questions", "neo_blocks", "is_done", "is_weekend"]
+                  "value_items", "items", "nfts_info", "today_datetime", "neo_questions", "neo_blocks", "is_done", "is_weekend", "neodata_infos"]
         lookup_field = 'nickname'
 
     def get_neo_room_image(self, obj):
@@ -346,6 +347,32 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+
+    # TODO : Neodata model 추가해서 neodata 기준으로 주는게 더 깔끔함.
+
+    def get_neodata_infos(self, obj):
+        neodata_created_at_list = []
+        item_layer_list = []
+        item_name_list = []
+        neo = obj.neo
+        value_items = ValuesItems.objects.filter(neo=neo).last()
+        daytime = value_items.created_at
+        daytime = DateFormat(daytime).format('Y.m.d')
+        neodata_created_at_list.append(daytime)
+
+        big5_items_qs = PersonalityItems.objects.filter(neo=neo).order_by('created_at')
+        for big5_item in big5_items_qs.iterator():
+            daytime = big5_item.created_at
+            daytime = DateFormat(daytime).format('Y.m.d')
+            if (big5_item.item_meta.name in item_name_list):
+                item_layer_list.append(big5_item.item_meta.layer_level)
+                print("DUPLICATED!")
+            else:
+                neodata_created_at_list.append(daytime)
+                item_layer_list.append(big5_item.item_meta.layer_level)
+                item_name_list.append(big5_item.item_meta.name)
+
+        return neodata_created_at_list
 
 
 
