@@ -381,12 +381,15 @@ class NeoHomeOwnerInfoRetrieveSerializer(serializers.ModelSerializer):
     def get_last_neo_questions(self, obj):
         question_list = []
         big5answer_qs = Big5Answer.objects.filter(neo=obj.neo,
-                                                  created_at__gte=datetime.datetime.today() - datetime.timedelta(hours=9))
+                                                  created_at__gte=datetime.datetime.now().date() - datetime.timedelta(hours=9))
         for big5answer in big5answer_qs.iterator():
             dic = {}
             dic["section"] = big5answer.big5_question.section
             dic["question"] = big5answer.big5_question.question
-            dic["result"] = big5answer.result
+            if big5answer.big5_question.weighted_value == -1:
+                dic["result"] = 6 - big5answer.result
+            else:
+                dic["result"] = big5answer.result
             question_list.append(dic)
         return question_list
 
